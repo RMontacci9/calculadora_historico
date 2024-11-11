@@ -51,6 +51,6 @@ Para rodar os testes automatizados:
 - Implementar a funcionalidade de limpeza do histórico.
 - Adicionar mais testes para aumentar a cobertura de código.
 - Refinar o design e melhorar a experiência do usuário.
-
+  
 ## Contato
 Se precisar de mais informações ou quiser discutir melhorias no projeto, fique à vontade para entrar em contato!
