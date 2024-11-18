@@ -1,36 +1,40 @@
-import 'package:app_calculadora_historico/features/calculator/data/repositories/calculation_repository_impl.dart';
+import 'package:app_calculadora_historico/features/calculator/data/datasources/calculation_local_datasource.dart';
 import 'package:app_calculadora_historico/features/calculator/domain/entities/calculation.dart';
+import 'package:app_calculadora_historico/features/calculator/data/repositories/calculation_repository_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mocktail/mocktail.dart';
+
+class MockCalculationDataSource extends Mock implements CalculationDataSource {}
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  late MockCalculationDataSource mockDataSource;
   late CalculationRepositoryImpl repository;
 
-  setUp(() async {
-    SharedPreferences.setMockInitialValues({});
-    repository = CalculationRepositoryImpl();
+  setUp(() {
+    mockDataSource = MockCalculationDataSource();
+    repository = CalculationRepositoryImpl(mockDataSource);
   });
 
-  group('CalculationRepositoryImpl', (){
-    test('deve salvar e recuperar um cálculo', () async {
-      final calculation = Calculation(
-        operand1: 2,
-        operand2: 3,
-        operator: '+',
-        result: 5,
-      );
+  test('deve delegar saveCalculation para o dataSource', () async {
+    final calculation = Calculation(operand1: 2.0, operand2: 3.0, operator: '+', result: 5.0);
 
-      await repository.saveCalculation(calculation);
+    when(() => mockDataSource.saveCalculation(calculation)).thenAnswer((_) async {});
 
-      final calculations = await repository.getCalculations();
-      expect(calculations?.length, 1);
-      expect(calculations!.first.result, 5);
-    });
+    await repository.saveCalculation(calculation);
 
-    test('deve retornar uma lista vazia se não houver cálculos', () async {
-      final calculations = await repository.getCalculations();
-      expect(calculations, isEmpty);
-    });
+    verify(() => mockDataSource.saveCalculation(calculation)).called(1);
+  });
+
+  test('deve delegar getCalculations para o dataSource', () async {
+    final calculations = [
+      Calculation(operand1: 2.0, operand2: 3.0, operator: '+', result: 5.0),
+    ];
+
+    when(() => mockDataSource.getCalculations()).thenAnswer((_) async => calculations);
+
+    final result = await repository.getCalculations();
+
+    expect(result, calculations);
+    verify(() => mockDataSource.getCalculations()).called(1);
   });
 }
